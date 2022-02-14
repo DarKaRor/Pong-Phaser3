@@ -31,18 +31,22 @@ class Scene_play extends Phaser.Scene {
         // Controls
         // Left
         this.cursor = this.input.keyboard.createCursorKeys();
+        let keyCodes = Phaser.Input.Keyboard.KeyCodes;
+        this.cursor.numpad0 =  this.input.keyboard.addKey(keyCodes.NUMPAD_ZERO);
 
         // Right
-        let keyCodes = Phaser.Input.Keyboard.KeyCodes;
         this.cursor.w = this.input.keyboard.addKey(keyCodes.W);
         this.cursor.s = this.input.keyboard.addKey(keyCodes.S);
         this.cursor.space = this.input.keyboard.addKey(keyCodes.SPACE);
+        this.cursor.g = this.input.keyboard.addKey(keyCodes.G);
 
         this.left.up = this.cursor.up;
         this.left.down = this.cursor.down;
+        this.left.slow = this.cursor.numpad0;
 
         this.right.up = this.cursor.w;
         this.right.down = this.cursor.s;
+        this.right.slow = this.cursor.g;
 
         // Choose random player to start
         if (Math.random() > 0.5) this.placeOnPaddle(this.ball, this.left, 'right');
@@ -62,7 +66,7 @@ class Scene_play extends Phaser.Scene {
             this.ball.speed += 50;
             [this.left, this.right].map(paddle =>{
                 paddle.speed += 50
-                if(paddle.speed > 450) paddle.speed = 450;
+                if(paddle.speed > 460) paddle.speed = 460;
             });
         }
 
@@ -78,8 +82,10 @@ class Scene_play extends Phaser.Scene {
 
         // Players movement
         [this.left, this.right].map(paddle => {
-            if (paddle.up.isDown) paddle.body.setVelocityY(-paddle.speed);
-            else if (paddle.down.isDown) paddle.body.setVelocityY(paddle.speed);
+            let speed = paddle.speed;
+            if(paddle.slow.isDown) speed = speed * 0.5;
+            if (paddle.up.isDown) paddle.body.setVelocityY(-speed);
+            else if (paddle.down.isDown) paddle.body.setVelocityY(speed);
             else paddle.body.setVelocityY(0);
         });
 
@@ -103,7 +109,7 @@ class Scene_play extends Phaser.Scene {
         ball.stuck = true;
         ball.target = paddle;
         ball.y = paddle.y - ball.height / 2;
-        let x = paddle.width + ball.width;
+        let x = paddle.width + ball.width + 5;
         if (side == 'left') x = -x;
         ball.x = paddle.x + x;
     }
