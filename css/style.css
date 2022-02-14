@@ -1,0 +1,28 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    background: rgb(27, 28, 32);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+canvas{
+    image-rendering: pixelated;
+    border-radius: 10px;
+    width:100%;
+}
+
+#container{
+    width:90%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
