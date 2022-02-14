@@ -17,8 +17,11 @@ class Ball extends Phaser.GameObjects.Sprite{
         let minSpeed = this.speed - range;
         let speed = Phaser.Math.Between(minSpeed, maxSpeed)
         if(speed > this.maxSpeed) speed = this.maxSpeed;
+        console.log(speed);
         return speed;
     }
+
+    getSpeed = () => this.speed > this.maxSpeed ? this.maxSpeed : this.speed;
 }
 
 export default Ball;
