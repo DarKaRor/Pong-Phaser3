@@ -32,7 +32,7 @@ class Scene_play extends Phaser.Scene {
         // Left
         this.cursor = this.input.keyboard.createCursorKeys();
         let keyCodes = Phaser.Input.Keyboard.KeyCodes;
-        this.cursor.numpad0 =  this.input.keyboard.addKey(keyCodes.NUMPAD_ZERO);
+        this.cursor.numpad0 = this.input.keyboard.addKey(keyCodes.NUMPAD_ZERO);
 
         // Right
         this.cursor.w = this.input.keyboard.addKey(keyCodes.W);
@@ -53,20 +53,23 @@ class Scene_play extends Phaser.Scene {
         else this.placeOnPaddle(this.ball, this.right, 'left');
 
         this.hits = 0;
+        this.botplay = true;
     }
 
     hitPaddle(ball, paddle) {
         let randomSpeed = ball.randomSpeed();
         if (ball.y < paddle.y) ball.body.setVelocityY(-randomSpeed);
         else ball.body.setVelocityY(randomSpeed);
+        ball.hit = paddle;
+
         this.hits++;
 
         // Get faster each 10 hits
-        if (this.hits % 10 == 0){
+        if (this.hits % 10 == 0) {
             this.ball.speed += 50;
-            [this.left, this.right].map(paddle =>{
+            [this.left, this.right].map(paddle => {
                 paddle.speed += 50
-                if(paddle.speed > 460) paddle.speed = 460;
+                if (paddle.speed > 460) paddle.speed = 460;
             });
         }
 
@@ -83,7 +86,7 @@ class Scene_play extends Phaser.Scene {
         // Players movement
         [this.left, this.right].map(paddle => {
             let speed = paddle.speed;
-            if(paddle.slow.isDown) speed = speed * 0.5;
+            if (paddle.slow.isDown) speed = speed * 0.5;
             if (paddle.up.isDown) paddle.body.setVelocityY(-speed);
             else if (paddle.down.isDown) paddle.body.setVelocityY(speed);
             else paddle.body.setVelocityY(0);
@@ -99,6 +102,26 @@ class Scene_play extends Phaser.Scene {
                 let randomSpeed = this.ball.randomSpeed();
                 if (this.ball.y < height / 2) this.ball.body.setVelocityY(randomSpeed);
                 else this.ball.body.setVelocityY(-randomSpeed);
+                this.ball.hit = this.ball.target;
+            }
+        }
+
+        // Bot play. Maybe needs to know which direction the ball is going. B to deactivate
+
+        this.input.keyboard.on('keydown-B', () => {
+            this.botplay = !this.botplay;
+        });
+
+        if (!this.ball.stuck && this.botplay) {
+            if (this.ball.x > width / 2 && this.ball.hit == this.left) {
+                let half = this.right.height / 2;
+                let {y} = this.right;
+                let offset = 10;
+
+                if (this.ball.y < y - half + offset || this.ball.y > y + half - offset) {
+                    if (this.ball.y > this.right.y) this.right.body.setVelocityY(this.right.speed);
+                    else if (this.ball.y < this.right.y) this.right.body.setVelocityY(this.right.speed * -1);
+                }
             }
         }
     }
