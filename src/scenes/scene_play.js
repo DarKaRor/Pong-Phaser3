@@ -53,11 +53,6 @@ class Scene_play extends Phaser.Scene {
         else this.placeOnPaddle(this.ball, this.right, 'left');
 
         this.hits = 0;
-
-        this.ball.speed = 1000;
-        [this.left, this.right].map(paddle =>{
-            paddle.speed = 460;
-        });
     }
 
     hitPaddle(ball, paddle) {
@@ -106,7 +101,6 @@ class Scene_play extends Phaser.Scene {
                 else this.ball.body.setVelocityY(-randomSpeed);
             }
         }
-        
     }
 
     placeOnPaddle(ball, paddle, side) {
