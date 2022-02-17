@@ -4,6 +4,7 @@ class Ball extends Phaser.GameObjects.Sprite{
         scene.add.existing(this); // Make existing in scene
         scene.physics.world.enable(this); // Enable physics
         this.body.setCollideWorldBounds(true);
+        this.body.onWorldBounds = true;
         this.body.setBounce(1);
         this.speed = 150;
         this.maxSpeed = 460;

@@ -54,6 +54,15 @@ class Scene_play extends Phaser.Scene {
 
         this.hits = 0;
         this.botplay = true;
+
+        this.left.color = '#00FFFF';
+        this.right.color =  '#FF00FF';
+
+        // If ball collides with world bounds, create particles
+        this.physics.world.on('worldbounds', (body, up, down, left, right) => {
+           if(body.gameObject == this.ball) this.createParticles(body.x, body.y);
+        });
+
     }
 
     hitPaddle(ball, paddle) {
@@ -63,6 +72,7 @@ class Scene_play extends Phaser.Scene {
         ball.hit = paddle;
 
         this.hits++;
+        this.createParticles(ball.x, ball.y,paddle.color);
 
         // Get faster each 10 hits
         if (this.hits % 10 == 0) {
@@ -74,6 +84,26 @@ class Scene_play extends Phaser.Scene {
         }
 
         if (this.hits === 100) this.cameras.main.setBackgroundColor('#A30000');
+    }
+
+    createParticles(x,y,color='#FFFFFF') {
+        // Make particles appear once 
+        this.particles = this.add.particles('ball');
+
+        let colorInt = parseInt(color.replace('#', '0x'), 16);
+
+        this.emitter = this.particles.createEmitter({
+            speed: 50,
+            scale: { start: 0.4, end: 0 },
+            blendMode: 'ADD',
+            x: x,
+            y: y,
+            lifespan: 1000,
+            tint: colorInt,
+            maxParticles: 10,
+        });
+
+        
     }
 
     update() {
