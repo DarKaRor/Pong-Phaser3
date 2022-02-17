@@ -75,12 +75,16 @@ class Scene_play extends Phaser.Scene {
         this.separator.setImmovable(true);
         this.lastTime = 0;
         this.tapTime = 0;
+        this.mobile = false;
 
         this.input.on('pointerdown', () =>{
             let clickDelay = this.time.now - this.tapTime;
             this.tapTime = this.time.now;
             console.log(clickDelay);
-            if (clickDelay < 300 && this.ball.stuck) this.releaseBall();
+            if (clickDelay < 300 && this.ball.stuck){
+                this.releaseBall();
+                this.mobile = true;
+            }
         });
     }
 
@@ -160,17 +164,13 @@ class Scene_play extends Phaser.Scene {
         });
 
         // Mobile support
-        // Pointer
-        // If browser screen size is small, use pointer
-        if (window.innerWidth < 600) {
+
+        if (this.mobile) {
             if (this.input.activePointer.isDown) {
                 if (this.input.activePointer.x < width / 2) this.left.body.setVelocityY(-this.left.speed);
                 else this.left.body.setVelocityY(+this.left.speed);
             }
             else this.left.body.setVelocityY(0);
-
-            // If user double taps, release ball
-            
         }
 
 
