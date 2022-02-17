@@ -14,7 +14,8 @@ class Scene_play extends Phaser.Scene {
         this.ball = new Ball(this, 400, 300, 'ball');
         this.left = new Paddle(this, 100, 300, 'left');
         this.right = new Paddle(this, 600, 300, 'right');
-        this.separator = this.add.image(0, 0, 'separator');
+        this.separator = this.physics.add.image(0, 0, 'separator');
+
         [this.ball, this.left, this.right, this.separator].map(obj => this.positionCenter(obj, config)); // Center all objects
 
         let space = width * 0.1;
@@ -70,11 +71,13 @@ class Scene_play extends Phaser.Scene {
             }
         });
 
+        this.trappedBall = false;
+        this.separator.setImmovable(true);
+        this.lastTime = 0;
     }
 
-    playRandom(sound){
+    playRandom(sound) {
         let pitch = Phaser.Math.FloatBetween(0.9, 1.2);
-        console.log(pitch);
         sound.setRate(pitch);
         sound.play();
     }
@@ -157,7 +160,9 @@ class Scene_play extends Phaser.Scene {
         });
 
         if (!this.ball.stuck && this.botplay) {
-            if (this.ball.x > width / 2 && this.ball.hit == this.left) {
+            let ballDir = this.ball.body.velocity.x > 0 ? 'right' : 'left';
+
+            if (this.ball.x > width / 2 && ballDir == 'right') {
                 let half = this.right.height / 2;
                 let { y } = this.right;
                 let offset = 12;
@@ -168,10 +173,36 @@ class Scene_play extends Phaser.Scene {
                 }
             }
         }
+
+        // Small chance of separator becoming collidable
+        if (this.time.now > this.lastTime + 1000) {
+            this.lastTime = this.time.now;
+
+            if (Math.random() > 0.95 && !this.trappedBall) {
+                // Separator becomes collidable
+
+                this.separatorCollider = this.physics.add.collider(this.separator, this.ball, this.separatorHit, null, this);
+                this.trappedBall = true;
+                this.separator.setTint(0xFF0000);
+
+                console.log('Separator is now collidable');
+                this.time.addEvent({
+                    delay: 5000,
+                    callback: () => {
+                        this.physics.world.removeCollider(this.separatorCollider);
+                        this.separator.clearTint();
+                        setTimeout(() => {
+                            this.trappedBall = false; 
+                        }, 2000);
+                        console.log('Separator is no longer collidable');
+                    }
+                });
+            }
+        }
     }
 
-    placeOnPaddle(ball, paddle, side,death = true) {
-        if(death){
+    placeOnPaddle(ball, paddle, side, death = true) {
+        if (death) {
             this.playRandom(this.deathSound);
             this.cameras.main.shake(500, 0.005);
             this.createParticles(ball.x, ball.y, '#FFFF00', 20);
