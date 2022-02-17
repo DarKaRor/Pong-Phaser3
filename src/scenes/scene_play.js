@@ -74,6 +74,14 @@ class Scene_play extends Phaser.Scene {
         this.trappedBall = false;
         this.separator.setImmovable(true);
         this.lastTime = 0;
+        this.tapTime = 0;
+
+        this.input.on('pointerdown', () =>{
+            let clickDelay = this.time.now - this.tapTime;
+            this.tapTime = this.time.now;
+            console.log(clickDelay);
+            if (clickDelay < 300 && this.ball.stuck) this.releaseBall();
+        });
     }
 
     playRandom(sound) {
@@ -122,6 +130,18 @@ class Scene_play extends Phaser.Scene {
         });
     }
 
+    releaseBall(){
+        let { width, height } = this.sys.game.config;
+
+        this.ball.stuck = false;
+        if (this.ball.target == this.left) this.ball.body.setVelocityX(this.ball.getSpeed());
+        else this.ball.body.setVelocityX(this.ball.getSpeed() * -1);
+        let randomSpeed = this.ball.randomSpeed();
+        if (this.ball.y < height / 2) this.ball.body.setVelocityY(randomSpeed);
+        else this.ball.body.setVelocityY(-randomSpeed);
+        this.ball.hit = this.ball.target;
+    }
+
 
     update() {
         let { config } = this.sys.game;
@@ -139,18 +159,26 @@ class Scene_play extends Phaser.Scene {
             else paddle.body.setVelocityY(0);
         });
 
+        // Mobile support
+        // Pointer
+        // If browser screen size is small, use pointer
+        if (window.innerWidth < 600) {
+            if (this.input.activePointer.isDown) {
+                if (this.input.activePointer.x < width / 2) this.left.body.setVelocityY(-this.left.speed);
+                else this.left.body.setVelocityY(+this.left.speed);
+            }
+            else this.left.body.setVelocityY(0);
+
+            // If user double taps, release ball
+            
+        }
+
+
+
         if (this.ball.stuck) {
             this.ball.y = this.ball.target.y;
             this.ball.body.setVelocityY(this.ball.target.body.velocity.y);
-            if (this.cursor.space.isDown) {
-                this.ball.stuck = false;
-                if (this.ball.target == this.left) this.ball.body.setVelocityX(this.ball.getSpeed());
-                else this.ball.body.setVelocityX(this.ball.getSpeed() * -1);
-                let randomSpeed = this.ball.randomSpeed();
-                if (this.ball.y < height / 2) this.ball.body.setVelocityY(randomSpeed);
-                else this.ball.body.setVelocityY(-randomSpeed);
-                this.ball.hit = this.ball.target;
-            }
+            if (this.cursor.space.isDown) this.releaseBall();
         }
 
         // Bot play. Maybe needs to know which direction the ball is going. B to deactivate
@@ -192,7 +220,7 @@ class Scene_play extends Phaser.Scene {
                         this.physics.world.removeCollider(this.separatorCollider);
                         this.separator.clearTint();
                         setTimeout(() => {
-                            this.trappedBall = false; 
+                            this.trappedBall = false;
                         }, 2000);
                         console.log('Separator is no longer collidable');
                     }
