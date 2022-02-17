@@ -21,6 +21,9 @@ class Scene_play extends Phaser.Scene {
         this.left.x = 0 + space + this.left.width / 2;
         this.right.x = width - space - this.right.width / 2;
 
+        this.hitSound = this.sound.add('hit');
+        this.paddleHitSound = this.sound.add('paddleHit');
+
         this.physics.world.setBoundsCollision(false, false, true, true);
 
         // Add collision between ball and paddles
@@ -56,13 +59,21 @@ class Scene_play extends Phaser.Scene {
         this.botplay = true;
 
         this.left.color = '#00FFFF';
-        this.right.color =  '#FF00FF';
+        this.right.color = '#FF00FF';
 
         // If ball collides with world bounds, create particles
         this.physics.world.on('worldbounds', (body, up, down, left, right) => {
-           if(body.gameObject == this.ball) this.createParticles(body.x, body.y);
+            if (body.gameObject == this.ball) this.createParticles(body.x, body.y);
+            this.playRandom(this.hitSound);
         });
 
+    }
+
+    playRandom(sound){
+        let pitch = Phaser.Math.FloatBetween(0.9, 1.2);
+        console.log(pitch);
+        sound.setRate(pitch);
+        sound.play();
     }
 
     hitPaddle(ball, paddle) {
@@ -72,7 +83,8 @@ class Scene_play extends Phaser.Scene {
         ball.hit = paddle;
 
         this.hits++;
-        this.createParticles(ball.x, ball.y,paddle.color);
+        this.createParticles(ball.x, ball.y, paddle.color);
+        this.playRandom(this.paddleHitSound);
 
         // Get faster each 10 hits
         if (this.hits % 10 == 0) {
@@ -86,7 +98,7 @@ class Scene_play extends Phaser.Scene {
         if (this.hits === 100) this.cameras.main.setBackgroundColor('#A30000');
     }
 
-    createParticles(x,y,color='#FFFFFF') {
+    createParticles(x, y, color = '#FFFFFF') {
         // Make particles appear once 
         this.particles = this.add.particles('ball');
 
@@ -103,7 +115,7 @@ class Scene_play extends Phaser.Scene {
             maxParticles: 10,
         });
 
-        
+
     }
 
     update() {
@@ -145,8 +157,8 @@ class Scene_play extends Phaser.Scene {
         if (!this.ball.stuck && this.botplay) {
             if (this.ball.x > width / 2 && this.ball.hit == this.left) {
                 let half = this.right.height / 2;
-                let {y} = this.right;
-                let offset = 10;
+                let { y } = this.right;
+                let offset = 12;
 
                 if (this.ball.y < y - half + offset || this.ball.y > y + half - offset) {
                     if (this.ball.y > this.right.y) this.right.body.setVelocityY(this.right.speed);
