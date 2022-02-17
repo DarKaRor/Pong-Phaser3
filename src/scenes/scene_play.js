@@ -23,6 +23,7 @@ class Scene_play extends Phaser.Scene {
 
         this.hitSound = this.sound.add('hit');
         this.paddleHitSound = this.sound.add('paddleHit');
+        this.deathSound = this.sound.add('death');
 
         this.physics.world.setBoundsCollision(false, false, true, true);
 
@@ -52,8 +53,8 @@ class Scene_play extends Phaser.Scene {
         this.right.slow = this.cursor.g;
 
         // Choose random player to start
-        if (Math.random() > 0.5) this.placeOnPaddle(this.ball, this.left, 'right');
-        else this.placeOnPaddle(this.ball, this.right, 'left');
+        if (Math.random() > 0.5) this.placeOnPaddle(this.ball, this.left, 'right', false);
+        else this.placeOnPaddle(this.ball, this.right, 'left', false);
 
         this.hits = 0;
         this.botplay = true;
@@ -63,8 +64,10 @@ class Scene_play extends Phaser.Scene {
 
         // If ball collides with world bounds, create particles
         this.physics.world.on('worldbounds', (body, up, down, left, right) => {
-            if (body.gameObject == this.ball) this.createParticles(body.x, body.y);
-            this.playRandom(this.hitSound);
+            if (body.gameObject == this.ball && !this.ball.stuck) {
+                this.createParticles(body.x, body.y);
+                this.playRandom(this.hitSound);
+            }
         });
 
     }
@@ -98,7 +101,7 @@ class Scene_play extends Phaser.Scene {
         if (this.hits === 100) this.cameras.main.setBackgroundColor('#A30000');
     }
 
-    createParticles(x, y, color = '#FFFFFF') {
+    createParticles(x, y, color = '#FFFFFF', maxParticles = 10) {
         // Make particles appear once 
         this.particles = this.add.particles('ball');
 
@@ -112,11 +115,10 @@ class Scene_play extends Phaser.Scene {
             y: y,
             lifespan: 1000,
             tint: colorInt,
-            maxParticles: 10,
+            maxParticles: maxParticles,
         });
-
-
     }
+
 
     update() {
         let { config } = this.sys.game;
@@ -168,7 +170,12 @@ class Scene_play extends Phaser.Scene {
         }
     }
 
-    placeOnPaddle(ball, paddle, side) {
+    placeOnPaddle(ball, paddle, side,death = true) {
+        if(death){
+            this.playRandom(this.deathSound);
+            this.cameras.main.shake(500, 0.005);
+            this.createParticles(ball.x, ball.y, '#FFFF00', 20);
+        }
         ball.body.setVelocity(0, 0);
         ball.stuck = true;
         ball.target = paddle;

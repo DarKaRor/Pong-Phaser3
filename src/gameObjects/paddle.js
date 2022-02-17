@@ -6,6 +6,8 @@ class Paddle extends Phaser.GameObjects.Sprite {
         this.body.immovable = true; // Make paddle immovable
         this.speed = 300;
         this.body.setCollideWorldBounds(true);
+        let extend = 4;
+        this.body.setSize(this.width, this.height + extend);
     }
 }
 

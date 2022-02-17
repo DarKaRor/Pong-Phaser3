@@ -10,6 +10,7 @@ export default class Bootloader extends Phaser.Scene {
 
         this.load.audio('hit', 'assets/sound/hit.wav');
         this.load.audio('paddleHit', 'assets/sound/paddleHit.wav');
+        this.load.audio('death', 'assets/sound/death.wav');
 
         this.load.on("complete", () => {
             this.scene.start('Scene_play');
