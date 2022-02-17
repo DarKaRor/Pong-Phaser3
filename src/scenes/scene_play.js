@@ -167,8 +167,10 @@ class Scene_play extends Phaser.Scene {
 
         if (this.mobile) {
             if (this.input.activePointer.isDown) {
-                if (this.input.activePointer.x < width / 2) this.left.body.setVelocityY(-this.left.speed);
-                else this.left.body.setVelocityY(+this.left.speed);
+                // Move to the pointer location
+                if(this.input.activePointer.y - 10 > this.left.y) this.left.body.setVelocityY(this.left.speed);
+                else if(this.input.activePointer.y + 10 < this.left.y) this.left.body.setVelocityY(-this.left.speed);
+                else this.left.body.setVelocityY(0);
             }
             else this.left.body.setVelocityY(0);
         }
